@@ -16,7 +16,7 @@ import com.vti.departmentservice.service.IDepartmentService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping(value = "/api/v1/departments")
+@RequestMapping(value = "/api/v2/departments")
 @RequiredArgsConstructor
 public class DepartmentController {
     private final IDepartmentService dpService;
@@ -24,40 +24,39 @@ public class DepartmentController {
 
     @GetMapping
     public List<DepartmentDTO> getListAccounts() {
-    
+
         List<Department> departments = dpService.getListDepartments();
-        
+
         List<DepartmentDTO> listDpDTO = modelMapper.map(
-            departments,  
-            new TypeToken <List<DepartmentDTO>> () {}.getType()
-        );
-        
+                departments,
+                new TypeToken<List<DepartmentDTO>>() {
+                }.getType());
+
         return listDpDTO;
     }
 
     @GetMapping("/account/{acId}")
     public List<DepartmentDTO> getDepartmentsByAccountId(@PathVariable int acId) {
-    
+
         List<Department> departments = dpService.getDepartmentsByAccountId(acId);
 
         List<DepartmentDTO> listDpDTO = modelMapper.map(
-            departments,  
-            new TypeToken <List<DepartmentDTO>> () {}.getType()
-        );
-        
+                departments,
+                new TypeToken<List<DepartmentDTO>>() {
+                }.getType());
+
         return listDpDTO;
     }
 
     @GetMapping("/{id}")
     public DepartmentDTO getDepartmentById(@PathVariable int id) {
-    
+
         Department department = dpService.getDepartmentById(id);
-        
+
         DepartmentDTO dpDTO = modelMapper.map(
-            department,  
-            DepartmentDTO.class
-        );
-        
+                department,
+                DepartmentDTO.class);
+
         return dpDTO;
     }
-} 
+}
