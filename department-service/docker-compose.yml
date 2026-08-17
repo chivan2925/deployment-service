@@ -1,11 +1,9 @@
+version: '3.8'
+
 services:
   department-service:
-    image: department-service:v1
+    image: department-service:latest
+    container_name: department-service
     ports:
-      - '${APP_PORT}:${APP_PORT}'
-    environment:
-      - APP_PORT=${APP_PORT}
-      - DB_URL=${DB_URL}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - "8082:8082"
     restart: always
