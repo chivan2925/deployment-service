@@ -39,8 +39,10 @@ jobs:
       - name: Deploy Container
         shell: powershell
         run: |
-          docker stop department-service 2>$null
-          docker rm department-service 2>$null
+          $container = docker ps -aq -f name=^department-service$
+          if ($container) {
+              docker rm -f department-service
+          }
           docker run -d --name department-service -p 8082:8082 --restart always ${{ env.IMAGE_NAME }}:latest
 
       - name: Show running containers
