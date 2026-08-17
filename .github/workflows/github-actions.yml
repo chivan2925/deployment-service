@@ -11,7 +11,6 @@ env:
   IMAGE_TAG: ${{ github.sha }}
 
 jobs:
-  # Job chung: Build Maven & Docker Image
   build:
     runs-on: self-hosted
     steps:
@@ -30,7 +29,6 @@ jobs:
       - name: Build Docker image
         run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} -t ${{ env.IMAGE_NAME }}:latest .
 
-  # Job 1: Triển khai môi trường Develop (Docker Compose)
   deploy-develop:
     needs: build
     if: github.ref == 'refs/heads/develop'
@@ -50,7 +48,6 @@ jobs:
       - name: Show running containers
         run: docker ps
 
-  # Job 2: Triển khai môi trường Production (Minikube / Kubernetes)
   deploy-production:
     needs: build
     if: github.ref == 'refs/heads/production'
