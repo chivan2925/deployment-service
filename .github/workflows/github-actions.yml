@@ -28,6 +28,7 @@ jobs:
         run: mvn clean package -DskipTests
 
       - name: Build Docker image
+        working-directory: ./department-service
         run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} -t ${{ env.IMAGE_NAME }}:latest .
 
   deploy-develop:
@@ -39,11 +40,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Stop old containers
+        working-directory: ./department-service
         run: |
           docker compose stop department-service || true
           docker compose rm -f department-service || true
 
       - name: Run Docker Compose
+        working-directory: ./department-service
         run: docker compose up -d
 
       - name: Show running containers
@@ -69,14 +72,14 @@ jobs:
       - name: Render Kubernetes manifests
         shell: powershell
         run: |
-          $content = Get-Content k8s/deployment.yaml -Raw
+          $content = Get-Content k8s/deployment.yml -Raw
           $content = $content.Replace('${IMAGE_TAG}', '${{ env.IMAGE_TAG }}')
-          Set-Content -Path k8s/deployment-rendered.yaml -Value $content
+          Set-Content -Path k8s/deployment-rendered.yml -Value $content
 
       - name: Deploy to Minikube
         run: |
-          kubectl apply -f k8s/deployment-rendered.yaml
-          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/deployment-rendered.yml
+          kubectl apply -f k8s/service.yml
 
       - name: Restart deployment
         run: kubectl rollout restart deployment/department-service
