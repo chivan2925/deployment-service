@@ -36,11 +36,12 @@ jobs:
     if: github.ref == 'refs/heads/develop'
     runs-on: self-hosted
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Docker Compose
-        run: docker compose up -d --force-recreate
+      - name: Deploy Container
+        shell: powershell
+        run: |
+          docker stop department-service 2>$null
+          docker rm department-service 2>$null
+          docker run -d --name department-service -p 8082:8082 --restart always ${{ env.IMAGE_NAME }}:latest
 
       - name: Show running containers
         run: docker ps
