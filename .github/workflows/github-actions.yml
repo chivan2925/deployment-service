@@ -40,7 +40,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Docker Compose
-        working-directory: ./department-service
         run: docker compose up -d --force-recreate
 
       - name: Show running containers
