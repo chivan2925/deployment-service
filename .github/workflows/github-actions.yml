@@ -1,36 +1,36 @@
 name: Build and Deploy
-
+ 
 on:
   push:
     branches:
       - develop
       - production
-
+ 
 env:
   IMAGE_NAME: department-service
   IMAGE_TAG: ${{ github.sha }}
-
+ 
 jobs:
   build:
     runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+ 
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-
+ 
       - name: Build Maven
         working-directory: ./department-service
         run: mvn clean package -DskipTests
-
+ 
       - name: Build Docker image
         working-directory: ./department-service
         run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} -t ${{ env.IMAGE_NAME }}:latest .
-
+ 
   deploy-develop:
     needs: build
     if: github.ref == 'refs/heads/develop'
@@ -39,13 +39,15 @@ jobs:
       - name: Deploy Container
         shell: powershell
         run: |
+          $ErrorActionPreference = "SilentlyContinue"
           docker stop department-service 2>$null
           docker rm department-service 2>$null
+          $ErrorActionPreference = "Stop"
           docker run -d --name department-service -p 8082:8082 --restart always ${{ env.IMAGE_NAME }}:latest
-
+ 
       - name: Show running containers
         run: docker ps
-
+ 
   deploy-production:
     needs: build
     if: github.ref == 'refs/heads/production'
@@ -53,26 +55,26 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+ 
       - name: Load image into Minikube
         run: minikube image load "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
-
+ 
       - name: Create or update Kubernetes secret
         shell: powershell
         run: |
           kubectl create secret generic department-service-secret --from-literal=SPRING_PROFILES_ACTIVE=production --dry-run=client -o yaml | kubectl apply -f -
-
+ 
       - name: Render Kubernetes manifests
         shell: powershell
         run: |
           $content = Get-Content k8s/deployment.yml -Raw
           $content = $content.Replace('${IMAGE_TAG}', '${{ env.IMAGE_TAG }}')
           Set-Content -Path k8s/deployment-rendered.yml -Value $content
-
+ 
       - name: Deploy to Minikube
         run: |
           kubectl apply -f k8s/deployment-rendered.yml
           kubectl apply -f k8s/service.yml
-
+ 
       - name: Restart deployment
         run: kubectl rollout restart deployment/department-service
