@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: department-service
-  labels:
-    app: department-service
 spec:
   replicas: 1
   selector:
@@ -15,11 +13,21 @@ spec:
         app: department-service
     spec:
       containers:
-      - name: department-service
-        image: department-service:${IMAGE_TAG}
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8082
-        envFrom:
-        - secretRef:
-            name: department-service-secret
+        - name: department-service
+          image: department-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://192.168.49.1:3306/department_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "123456"
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: "com.mysql.cj.jdbc.Driver"
+            - name: SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT
+              value: "org.hibernate.dialect.MySQLDialect"
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "update"
