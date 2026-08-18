@@ -56,6 +56,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
  
+      - name: Ensure Minikube is running
+        shell: powershell
+        run: |
+          $status = minikube status --format='{{.Host}}' 2>$null
+          if ($status -ne "Running") {
+            Write-Host "Minikube khong o trang thai Running (hien tai: $status). Dang khoi dong lai..."
+            minikube start --driver=docker
+          } else {
+            Write-Host "Minikube dang chay binh thuong."
+          }
+          kubectl cluster-info
+ 
       - name: Load image into Minikube
         run: minikube image load "${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
  
